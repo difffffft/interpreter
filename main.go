@@ -5,17 +5,6 @@ import (
 )
 
 func main() {
-	input := `=+(){},;`
-	l := lexer.New(input)
-
-	//读取第一个token
-	l.NextToken()
-	l.NextToken()
-	l.NextToken()
-	l.NextToken()
-	l.NextToken()
-	l.NextToken()
-	l.NextToken()
-	l.NextToken()
-	//fmt.Println(t)
+	input := `=+abc_(){},;`
+	lexer.New(input)
 }
