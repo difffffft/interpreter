@@ -11,6 +11,7 @@ const VAR = "VAR"
 
 // INT 字面量
 const INT = "INT"
+const FLOAT = "FLOAT"
 
 // ASSIGN ADD 运算符
 const ASSIGN = "="
@@ -34,4 +35,18 @@ type TokenType string
 type Token struct {
 	Type    TokenType
 	Literal string
+}
+
+//关键字
+var keywords = map[string]TokenType{
+	"function": FUNCTION,
+	"let":      LET,
+}
+
+// IsKeyWords 判断是否是关键字还是变量
+func IsKeyWords(s string) TokenType {
+	if tok, ok := keywords[s]; ok {
+		return tok
+	}
+	return VAR
 }
