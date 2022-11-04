@@ -1,52 +1,50 @@
 package token
 
-// ILLEGAL 未知的词法单元
-const ILLEGAL = "ILLEGAL"
-
-// EOF 文件结束符
-const EOF = "EOF"
-
-// VAR 标识符
-const VAR = "VAR"
-
-// INT 字面量
-const INT = "INT"
-const FLOAT = "FLOAT"
-
-// ASSIGN ADD 运算符
-const ASSIGN = "="
-const ADD = "+"
-
-// COMMA SEMICOLON 分隔符
-const COMMA = ","
-const SEMICOLON = ";"
-
-// LPAREN RPAREN LBRACE RBRACE 分隔符
-const LPAREN = "("
-const RPAREN = ")"
-const LBRACE = "{"
-const RBRACE = "}"
-
-const FUNCTION = "FUNCTION"
-const LET = "LET"
-
-type TokenType string
-
 type Token struct {
-	Type    TokenType
-	Literal string
+	Type  string
+	Value string
 }
 
-//关键字
-var keywords = map[string]TokenType{
-	"function": FUNCTION,
-	"let":      LET,
+var KeyWords = map[string][]string{
+	NULL:     {"null"},
+	IMPORT:   {"import"},
+	CONST:    {"const"},
+	LET:      {"let"},
+	ENUM:     {"enum"},
+	FUNCTION: {"function"},
+	RETURN:   {"return"},
+	TRUE:     {"true"},
+	FALSE:    {"false"},
+	IF:       {"if"},
+	ELSE:     {"else"},
+	SWITCH:   {"switch"},
+	CASE:     {"case"},
+	DEFAULT:  {"default"},
+	TRY:      {"try"},
+	CATCH:    {"catch"},
+	THROW:    {"throw"},
+	FOR:      {"for"},
+	IN:       {"in"},
+	WHILE:    {"while"},
+	DO:       {"do"},
+	BREAK:    {"break"},
+	CONTINUE: {"continue"},
+	CLASS:    {"class"},
+	NEW:      {"new"},
+	STATIC:   {"static"},
+	THIS:     {"this"},
+	SUPER:    {"super"},
 }
 
-// IsKeyWords 判断是否是关键字还是变量
-func IsKeyWords(s string) TokenType {
-	if tok, ok := keywords[s]; ok {
-		return tok
+func IsKeyWords(s string) string {
+	//判断是否是关键字
+	for k, v := range KeyWords {
+		for _, j := range v {
+			if j == s {
+				return k
+			}
+		}
 	}
+	//不是关键字就是变量
 	return VAR
 }

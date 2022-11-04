@@ -2,12 +2,15 @@ package main
 
 import (
 	"e/lexer"
+	"io/ioutil"
 )
 
 func main() {
-	input := `
-		=+abc_(function)
-		{let}$$,;12345.67.
-`
-	lexer.New(input)
+	codeStr := ReadFile("./test/test.js")
+	lexer.New(codeStr)
+}
+
+func ReadFile(fileName string) string {
+	f, _ := ioutil.ReadFile(fileName)
+	return string(f)
 }
