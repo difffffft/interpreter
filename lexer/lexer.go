@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"e/token"
-	"fmt"
 )
 
 type Lexer struct {
@@ -16,6 +15,13 @@ type Lexer struct {
 	ch byte
 }
 
+func (l *Lexer) GetPosition() int {
+	return l.position
+}
+func (l *Lexer) GetReadPosition() int {
+	return l.readPosition
+}
+
 // New 初始化
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
@@ -24,11 +30,11 @@ func New(input string) *Lexer {
 	l.ReadChar()
 
 	//循环读取
-	var _token token.Token
-	for _token.Type != token.EOF {
-		_token = l.NextToken()
-		fmt.Println(_token.Type, _token.Value)
-	}
+	//var _token token.Token
+	//for _token.Type != token.EOF {
+	//	_token = l.NextToken()
+	//	fmt.Println(_token.Type, _token.Value)
+	//}
 	return l
 }
 

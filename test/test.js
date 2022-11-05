@@ -1,3 +1,3 @@
-let add = function (x, y) {
-    return x + y
-}
+let x = abcdefg;
+let y == abcdefg;
+let z = abcdefg;
