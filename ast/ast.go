@@ -37,25 +37,23 @@ func (p *Program) TokenValue() string {
 	return ""
 }
 
-// 标识符词法单元
-type Identifier struct {
+// Identifier 标识符词法单元
+type IdentifierStatement struct {
 	Token token.Token
 	Value string
 }
 
-func (i *Identifier) statementNode() {
+func (i *IdentifierStatement) statementNode() {
 }
-func (i *Identifier) TokenValue() string {
+func (i *IdentifierStatement) TokenValue() string {
 	return i.Token.Value
 }
 
-// let词法单元
+// LetStatement let词法单元
 type LetStatement struct {
 	Token token.Token
-
 	//标识符
-	Name *Identifier
-
+	Name *IdentifierStatement
 	//表达式
 	Value Experssion
 }

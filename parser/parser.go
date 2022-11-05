@@ -19,7 +19,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
 	for p.currToken.Type != token.EOF {
-		stmt := p.ParseStatement()
+		stmt := p.parseStatement()
 		if stmt != nil {
 
 			//语法分析过程中如果遇到语法分析错误,就暴露给用户
@@ -40,7 +40,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 //语法分析遇到 期望token错误
 //期望token错误表示，你的下一个token和上一个token不配套使用时
-func (p *Parser) addExpectError(t string) {
+func (p *Parser) addExpectError(t token.TokenType) {
 	msg := fmt.Sprintf("语法出现错误\n期望得到的类型: %s\n而程序的类型:%s\n位置:%d\n值:%s", t, p.peekToken.Type, p.l.GetPosition(), p.peekToken.Value)
 	p.errors = append(p.errors, msg)
 }
@@ -52,26 +52,35 @@ func (p *Parser) nextToken() {
 	p.peekToken = p.l.NextToken()
 }
 
-func (p *Parser) ParseStatement() ast.Statement {
+//每分析完一个语句,就开始分析下一个语句
+//分析语句
+func (p *Parser) parseStatement() ast.Statement {
 	switch p.currToken.Type {
 	case token.LET:
-		return p.ParseLetStatement()
+		x := p.ParseLetStatement()
+
+		fmt.Println(x.Token)
+		fmt.Println(x.Name)
+		fmt.Println(x.Value)
+
+		return x
 	default:
 		return nil
 	}
 }
 
-func (p *Parser) currTokenIs(t string) bool {
+//期望遇到某个token
+func (p *Parser) expectCurrTokenIs(t token.TokenType) bool {
 	return p.currToken.Type == t
 }
 
-//判断下一个token和自己的预期是否想符合
-func (p *Parser) peekTokenIs(t string) bool {
+//下一个token,期望遇到某个token
+func (p *Parser) expectNextTokenIs(t token.TokenType) bool {
 	return p.peekToken.Type == t
 }
 
-func (p *Parser) expectPeek(t string) bool {
-	if p.peekTokenIs(t) {
+func (p *Parser) expectNextToken(t token.TokenType) bool {
+	if p.expectNextTokenIs(t) {
 		p.nextToken()
 		return true
 	} else {
@@ -81,20 +90,25 @@ func (p *Parser) expectPeek(t string) bool {
 }
 func (p *Parser) ParseLetStatement() *ast.LetStatement {
 	stmt := &ast.LetStatement{Token: p.currToken}
-	if !p.expectPeek(token.VAR) {
+	if !p.expectNextToken(token.VAR) {
 		return nil
 	}
-	stmt.Name = &ast.Identifier{Token: p.currToken, Value: p.currToken.Value}
-	if !p.expectPeek(token.ASSIGN) {
+
+	//表示找到了let声明的变量的名称
+	//let a
+	//a就是stmt.Name
+	stmt.Name = &ast.IdentifierStatement{Token: p.currToken, Value: p.currToken.Value}
+
+	if !p.expectNextToken(token.ASSIGN) {
 		return nil
 	}
-	if !p.currTokenIs(token.SEMICOLON) {
+	if !p.expectCurrTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 	return stmt
 }
 
 func New(l *lexer.Lexer) *Parser {
-	p := &Parser{l: l, errors: []string{}}
+	p := &Parser{l: l}
 	return p
 }

@@ -1,11 +1,11 @@
 package token
 
 type Token struct {
-	Type  string
+	Type  TokenType
 	Value string
 }
 
-var KeyWords = map[string][]string{
+var KeyWords = map[TokenType][]string{
 	NULL:     {"null"},
 	IMPORT:   {"import"},
 	CONST:    {"const"},
@@ -36,7 +36,7 @@ var KeyWords = map[string][]string{
 	SUPER:    {"super"},
 }
 
-func IsKeyWords(s string) string {
+func IsKeyWords(s string) TokenType {
 	//判断是否是关键字
 	for k, v := range KeyWords {
 		for _, j := range v {

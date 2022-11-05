@@ -1,5 +1,7 @@
 package token
 
+type TokenType string
+
 const NULL = "NULL"
 
 const IMPORT = "IMPORT"

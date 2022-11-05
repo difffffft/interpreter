@@ -56,16 +56,7 @@ func IsLetter(ch byte) bool {
 }
 
 // IsDigit 判断是否是数字开头
-func IsDigit(ch byte, pointNum *int) bool {
-	//if pointNum != nil {
-	//	if *pointNum > 1 {
-	//		return false
-	//	}
-	//	if ch == '.' {
-	//		*pointNum++
-	//		return true
-	//	}
-	//}
+func IsDigit(ch byte) bool {
 	return '0' <= ch && ch <= '9'
 }
 
@@ -101,9 +92,8 @@ func (l *Lexer) ReadVar() string {
 // ReadNumber 读取int类型的数字
 func (l *Lexer) ReadNumber() string {
 	position := l.position
-	pointNum := 0
 	//是数字就继续往下读
-	for IsDigit(l.ch, &pointNum) {
+	for IsDigit(l.ch) {
 		l.ReadChar()
 	}
 	return l.input[position:l.position]
@@ -192,7 +182,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Value = l.ReadVar()
 			tok.Type = token.IsKeyWords(tok.Value)
 			return tok
-		} else if IsDigit(l.ch, nil) {
+		} else if IsDigit(l.ch) {
 			//判断是变量还是关键字
 			tok.Value = l.ReadNumber()
 			tok.Type = token.INT
