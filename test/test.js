@@ -1,3 +1,2 @@
-let x = abcdefg;
-let y == abcdefg;
-let z = abcdefg;
+5 + 2
+abc(7)

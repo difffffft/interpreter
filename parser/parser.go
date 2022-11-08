@@ -5,13 +5,41 @@ import (
 	"e/lexer"
 	"e/token"
 	"fmt"
+	"strconv"
 )
+
+//表达式前缀解析函数
+type prefixParseFn func() ast.Expression
+
+//表达式中缀解析函数
+type midfixParseFn func(es ast.Expression) ast.Expression
 
 type Parser struct {
 	l         *lexer.Lexer
 	currToken token.Token
 	peekToken token.Token
 	errors    []string
+
+	prefixParseFns map[token.TokenType]prefixParseFn
+	midfixParseFns map[token.TokenType]midfixParseFn
+}
+
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+func (p *Parser) registerMidfix(tokenType token.TokenType, fn midfixParseFn) {
+	p.midfixParseFns[tokenType] = fn
+}
+
+// New 入口函数
+func New(l *lexer.Lexer) *Parser {
+	p := &Parser{l: l}
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.VAR, p.ParseVar)
+	p.registerPrefix(token.INT, p.ParseInt)
+
+	p.ParseProgram()
+	return p
 }
 
 // ParseProgram 开始分析程序,得到语法分析树
@@ -57,15 +85,16 @@ func (p *Parser) nextToken() {
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.currToken.Type {
 	case token.LET:
-		x := p.ParseLetStatement()
-
-		fmt.Println(x.Token)
-		fmt.Println(x.Name)
-		fmt.Println(x.Value)
-
-		return x
+		return p.ParseLetStatement()
+	case token.RETURN:
+		return p.ParseReturnStatement()
+	case token.VAR:
+		return p.ParseExpressionStatement()
+	case token.INT:
+		return p.ParseIntStatement()
 	default:
 		return nil
+		//return p.ParseExpressionStatement()
 	}
 }
 
@@ -88,17 +117,13 @@ func (p *Parser) expectNextToken(t token.TokenType) bool {
 		return false
 	}
 }
+
 func (p *Parser) ParseLetStatement() *ast.LetStatement {
 	stmt := &ast.LetStatement{Token: p.currToken}
 	if !p.expectNextToken(token.VAR) {
 		return nil
 	}
-
-	//表示找到了let声明的变量的名称
-	//let a
-	//a就是stmt.Name
-	stmt.Name = &ast.IdentifierStatement{Token: p.currToken, Value: p.currToken.Value}
-
+	stmt.Name = &ast.VarStatement{Token: p.currToken, Value: p.currToken.Value}
 	if !p.expectNextToken(token.ASSIGN) {
 		return nil
 	}
@@ -108,7 +133,59 @@ func (p *Parser) ParseLetStatement() *ast.LetStatement {
 	return stmt
 }
 
-func New(l *lexer.Lexer) *Parser {
-	p := &Parser{l: l}
-	return p
+func (p *Parser) ParseReturnStatement() *ast.ReturnStatement {
+	stmt := &ast.ReturnStatement{Token: p.currToken}
+
+	p.nextToken()
+
+	//直到return语句遇到了;号
+	if !p.expectCurrTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+	return stmt
+}
+
+func (p *Parser) ParseExpression(precedence int) ast.Expression {
+	prefix := p.prefixParseFns[p.currToken.Type]
+	if prefix == nil {
+		return nil
+	}
+	leftExp := prefix()
+	return leftExp
+}
+
+func (p *Parser) ParseExpressionStatement() *ast.ExpressionStatement {
+	stmt := &ast.ExpressionStatement{Token: p.currToken}
+	//拿到表达式的值
+	stmt.Value = p.ParseExpression(LOWEST)
+	//如果下一个是分号,就继续往后移一下，方便下一个程序调用
+	if p.expectCurrTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+	return stmt
+}
+func (p *Parser) ParseIntStatement() *ast.ExpressionStatement {
+	stmt := &ast.ExpressionStatement{Token: p.currToken}
+	//拿到表达式的值
+	stmt.Value = p.ParseExpression(LOWEST)
+	//如果下一个是分号,就继续往后移一下，方便下一个程序调用
+	if p.expectCurrTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+	return stmt
+}
+
+func (p *Parser) ParseVar() ast.Expression {
+	return &ast.VarStatement{Token: p.currToken, Value: p.currToken.Value}
+}
+
+func (p *Parser) ParseInt() ast.Expression {
+	stmt := &ast.IntegerStatement{Token: p.currToken}
+	value, err := strconv.ParseInt(p.currToken.Value, 0, 64)
+	if err != nil {
+		p.addExpectError(p.currToken.Type)
+		return nil
+	}
+	stmt.Value = value
+	return stmt
 }

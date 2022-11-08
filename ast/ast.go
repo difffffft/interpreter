@@ -6,9 +6,8 @@ import (
 
 // Node 每个节点都需要实现Node接口
 type Node interface {
-
-	// TokenValue 返回词法单元的字面量
 	TokenValue() string
+	//String() string
 }
 
 // Statement 语句
@@ -19,7 +18,7 @@ type Statement interface {
 	statementNode()
 }
 
-type Experssion interface {
+type Expression interface {
 	Node
 	expressionNode()
 }
@@ -37,15 +36,18 @@ func (p *Program) TokenValue() string {
 	return ""
 }
 
-// Identifier 标识符词法单元
-type IdentifierStatement struct {
+// VarStatement 是一个表达式
+// VarStatement 实现了Expression接口
+type VarStatement struct {
 	Token token.Token
 	Value string
 }
 
-func (i *IdentifierStatement) statementNode() {
+func (i *VarStatement) statementNode() {
 }
-func (i *IdentifierStatement) TokenValue() string {
+func (i *VarStatement) expressionNode() {
+}
+func (i *VarStatement) TokenValue() string {
 	return i.Token.Value
 }
 
@@ -53,9 +55,9 @@ func (i *IdentifierStatement) TokenValue() string {
 type LetStatement struct {
 	Token token.Token
 	//标识符
-	Name *IdentifierStatement
+	Name *VarStatement
 	//表达式
-	Value Experssion
+	Value Expression
 }
 
 //func (s *LetStatement) String() string {
@@ -66,4 +68,47 @@ func (l *LetStatement) statementNode() {
 }
 func (l *LetStatement) TokenValue() string {
 	return l.Token.Value
+}
+
+// ReturnStatement return词法单元
+type ReturnStatement struct {
+	//每一个词法单元都包含一个关键字
+	Token token.Token
+	//表达式
+	Value Expression
+}
+
+func (rs *ReturnStatement) statementNode() {
+}
+func (rs *ReturnStatement) TokenValue() string {
+	return rs.Token.Value
+}
+
+// ExpressionStatement 表达式词法单元
+type ExpressionStatement struct {
+	//每一个词法单元都包含一个关键字
+	Token token.Token
+	//表达式
+	Value Expression
+}
+
+func (es *ExpressionStatement) statementNode() {
+}
+func (es *ExpressionStatement) TokenValue() string {
+	return es.Token.Value
+}
+
+// IntegerStatement 是一个表达式
+// IntegerStatement 实现了Expression接口
+type IntegerStatement struct {
+	Token token.Token
+	Value int64
+}
+
+func (es *IntegerStatement) statementNode() {
+}
+func (es *IntegerStatement) expressionNode() {
+}
+func (es *IntegerStatement) TokenValue() string {
+	return es.Token.Value
 }

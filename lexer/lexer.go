@@ -25,16 +25,8 @@ func (l *Lexer) GetReadPosition() int {
 // New 初始化
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
-
 	//初始化游标
 	l.ReadChar()
-
-	//循环读取
-	//var _token token.Token
-	//for _token.Type != token.EOF {
-	//	_token = l.NextToken()
-	//	fmt.Println(_token.Type, _token.Value)
-	//}
 	return l
 }
 
@@ -50,9 +42,14 @@ func (l *Lexer) ReadChar() {
 	l.readPosition += 1
 }
 
-// IsLetter 判断是否是字母和下划线开头
-func IsLetter(ch byte) bool {
+// FirstIsLetter 用来判断变量第一个字母是不是符合规范
+func FirstIsLetter(ch byte) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+
+// IsLetter 用来判断除第一个字母之外是否符合变量的规范
+func IsLetter(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || '0' < ch && ch < '9'
 }
 
 // IsDigit 判断是否是数字开头
@@ -177,7 +174,7 @@ func (l *Lexer) NextToken() token.Token {
 	case '0':
 		tok = token.Token{Type: token.EOF, Value: ""}
 	default:
-		if IsLetter(l.ch) {
+		if FirstIsLetter(l.ch) {
 			//判断是变量还是关键字
 			tok.Value = l.ReadVar()
 			tok.Type = token.IsKeyWords(tok.Value)
@@ -190,6 +187,7 @@ func (l *Lexer) NextToken() token.Token {
 		} else {
 			tok.Type = token.ILLEGAL
 			tok.Value = "未知语法"
+			panic("未知语法:" + string(l.ch))
 		}
 	}
 	l.ReadChar()
